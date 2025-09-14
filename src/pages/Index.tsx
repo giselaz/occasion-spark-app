@@ -20,16 +20,20 @@ const Index = () => {
             </div>
             
             <div className="hidden md:flex items-center gap-8">
-              <a href="#" className="text-foreground hover:text-primary transition-colors">Browse Events</a>
+              <a href="/events" className="text-foreground hover:text-primary transition-colors">Browse Events</a>
               <a href="#" className="text-foreground hover:text-primary transition-colors">Create Event</a>
               <a href="#" className="text-foreground hover:text-primary transition-colors">Help</a>
             </div>
             
             <div className="flex items-center gap-3">
-              <Button variant="ghost">Sign In</Button>
-              <Button className="gradient-primary text-white hover:shadow-medium transition-all">
-                Sign Up
-              </Button>
+              <a href="/signin">
+                <Button variant="ghost">Sign In</Button>
+              </a>
+              <a href="/signup">
+                <Button className="gradient-primary text-white hover:shadow-medium transition-all">
+                  Sign Up
+                </Button>
+              </a>
             </div>
           </div>
         </div>

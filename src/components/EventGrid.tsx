@@ -90,7 +90,9 @@ export const EventGrid = ({ title, subtitle }: EventGridProps) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((event) => (
-            <EventCard key={event.id} {...event} />
+            <a href={`/event/${event.id}`} key={event.id}>
+              <EventCard {...event} />
+            </a>
           ))}
         </div>
       </div>
