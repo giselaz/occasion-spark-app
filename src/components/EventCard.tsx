@@ -1,35 +1,34 @@
 import { Calendar, MapPin, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-interface EventCardProps {
-  id: string;
-  title: string;
-  image: string;
-  date: string;
-  time: string;
-  location: string;
-  price: string;
-  category: string;
-  attendees: number;
-}
+import { EventModel } from "@/types/event";
+// interface EventCardProps {
+//   _id: string;
+//   name: string;
+//   image: string;
+//   start_date: string;
+//   end_date: string;
+//   location: string;
+//   price: string;
+//   category: string;
+//   attendees: number; 
+// }
 
 export const EventCard = ({ 
-  title, 
+  name, 
   image, 
-  date, 
-  time, 
+  start_date, 
+  end_date, 
   location, 
-  price, 
-  category, 
-  attendees 
-}: EventCardProps) => {
+  fee, 
+  category,  
+}: EventModel) => {
   return (
     <Card className="group overflow-hidden border-0 shadow-soft hover:shadow-medium transition-all duration-300 hover:scale-[1.02] cursor-pointer bg-card">
       <div className="relative overflow-hidden">
         <img 
           src={image} 
-          alt={title}
+          alt={name}
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
         />
         <div className="absolute top-3 left-3">
@@ -39,20 +38,20 @@ export const EventCard = ({
         </div>
         <div className="absolute top-3 right-3">
           <div className="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 text-xs font-semibold text-foreground">
-            {price}
+            {fee === 0 ? "Free" : `$${fee}`}
           </div>
         </div>
       </div>
       
       <div className="p-5">
         <h3 className="font-semibold text-lg mb-2 text-card-foreground group-hover:text-primary transition-colors line-clamp-2">
-          {title}
+          {name}
         </h3>
         
         <div className="space-y-2 mb-4">
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <Calendar className="w-4 h-4" />
-            <span>{date} • {time}</span>
+            <span>{start_date} • {end_date}</span>
           </div>
           
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -62,7 +61,7 @@ export const EventCard = ({
           
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <Users className="w-4 h-4" />
-            <span>{attendees} attendees</span>
+            
           </div>
         </div>
       </div>
