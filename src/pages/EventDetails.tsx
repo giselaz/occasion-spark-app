@@ -3,33 +3,21 @@ import { Calendar, MapPin, Users, Clock, Share2, Heart, Tag } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import musicConcert from "@/assets/music-concert.jpg";
 import techConference from "@/assets/tech-conference.jpg";
+import { useQuery } from "@tanstack/react-query"; 
+import { EventModel } from "@/types/event";
+import { getEventById } from "@/api/eventService";
 
 const EventDetails = () => {
-  const { id } = useParams();
-  
-  // Mock event data - in a real app, this would come from an API
-  const event = {
-    id: id,
-    title: "Summer Music Festival 2024",
-    description: "Join us for an unforgettable evening of live music featuring top artists from around the world. This outdoor festival will showcase multiple genres including rock, pop, indie, and electronic music. Food trucks and local vendors will be available throughout the venue.",
-    longDescription: "Experience the magic of live music under the stars at our annual Summer Music Festival. This year's lineup features headliners that have topped charts worldwide, alongside emerging artists who are shaping the future of music. The festival grounds will transform into a vibrant community space with art installations, interactive experiences, and sustainable food options. Whether you're a music enthusiast or just looking for a great time with friends, this event promises memories that will last a lifetime.",
-    image: musicConcert,
-    date: "June 15, 2024",
-    time: "7:00 PM - 11:00 PM",
-    location: "Central Park, New York",
-    venue: "Central Park Great Lawn",
-    address: "Central Park, New York, NY 10024",
-    price: 45,
-    category: "Music",
-    attendees: 1250,
-    maxAttendees: 5000,
-    organizer: "NYC Music Events",
-    tags: ["Outdoor", "Live Music", "Festival", "Family Friendly"]
-  };
-
+  const { id } = useParams(); 
+  const {data:event,isLoading,error} = useQuery<EventModel>({
+  queryKey:['single_event',id],
+  queryFn:()=> getEventById(id)
+});
+if(isLoading)
+{
+  return<> Event is loading...</>
+}
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -53,7 +41,7 @@ const EventDetails = () => {
                 Share
               </Button>
               <Button className="gradient-primary text-white">
-                Get Tickets - ${event.price}
+                Get Tickets - ${event.fee}
               </Button>
             </div>
           </div>
@@ -64,20 +52,25 @@ const EventDetails = () => {
       <div className="relative h-96 overflow-hidden">
         <img 
           src={event.image} 
-          alt={event.title}
+          alt={event.name}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
         <div className="absolute bottom-6 left-6 text-white">
           <Badge variant="secondary" className="mb-3">
-            {event.category}
+            <ul>
+              {event.category.map(cat => (
+                <li>{cat.name}</li>
+              ))}
+              
+            </ul>
           </Badge>
-          <h1 className="text-4xl font-bold mb-2">{event.title}</h1>
+          <h1 className="text-4xl font-bold mb-2">{event.name}</h1>
           <div className="flex items-center gap-4 text-white/90">
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              <span>{event.date}</span>
+              <span>{event.start_date}</span>
             </div>
             <div className="flex items-center gap-1">
               <MapPin className="w-4 h-4" />
@@ -98,12 +91,12 @@ const EventDetails = () => {
                 {event.description}
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                {event.longDescription}
+                {event.description}
               </p>
             </Card>
 
             {/* Tags */}
-            <Card className="p-6">
+            {/* <Card className="p-6">
               <h3 className="text-lg font-semibold mb-3">Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {event.tags.map((tag, index) => (
@@ -113,7 +106,7 @@ const EventDetails = () => {
                   </Badge>
                 ))}
               </div>
-            </Card>
+            </Card> */}
 
             {/* Organizer */}
             <Card className="p-6">
@@ -121,11 +114,11 @@ const EventDetails = () => {
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-lg">
-                    {event.organizer.charAt(0)}
+                    {event.vendor.name}
                   </span>
                 </div>
                 <div>
-                  <p className="font-medium">{event.organizer}</p>
+                  <p className="font-medium">{event.vendor.name}</p>
                   <p className="text-sm text-muted-foreground">Event Organizer</p>
                 </div>
               </div>
@@ -138,7 +131,7 @@ const EventDetails = () => {
             <Card className="p-6 sticky top-24">
               <div className="text-center mb-6">
                 <div className="text-3xl font-bold text-primary mb-2">
-                  ${event.price}
+                  ${event.fee}
                 </div>
                 <p className="text-muted-foreground">per ticket</p>
               </div>
@@ -147,26 +140,26 @@ const EventDetails = () => {
                 <div className="flex items-center gap-3">
                   <Calendar className="w-5 h-5 text-muted-foreground" />
                   <div>
-                    <p className="font-medium">{event.date}</p>
-                    <p className="text-sm text-muted-foreground">{event.time}</p>
+                    <p className="font-medium">{event.start_date}</p>
+                    <p className="text-sm text-muted-foreground">{event.end_date}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-muted-foreground" />
-                  <div>
+                  {/* <div>
                     <p className="font-medium">{event.venue}</p>
                     <p className="text-sm text-muted-foreground">{event.address}</p>
-                  </div>
+                  </div> */}
                 </div>
 
                 <div className="flex items-center gap-3">
                   <Users className="w-5 h-5 text-muted-foreground" />
                   <div>
-                    <p className="font-medium">{event.attendees} attending</p>
+                    {/* <p className="font-medium">{event.attendees} attending</p>
                     <p className="text-sm text-muted-foreground">
                       {event.maxAttendees - event.attendees} spots left
-                    </p>
+                    </p> */}
                   </div>
                 </div>
               </div>

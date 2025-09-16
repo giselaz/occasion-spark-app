@@ -1,7 +1,8 @@
 import clsx from "clsx";
 import { EventCard } from "./EventCard";
-
+import { Link } from "react-router-dom";
 import { useEvents } from "@/hooks/useEvents";
+import { useEffect } from "react";
 // const events = [
 //   {
 //     id: "1",
@@ -77,7 +78,8 @@ interface EventGridProps {
 }
 
 export const EventGrid = ({ title, subtitle }: EventGridProps) => {
-  const { events, loading, bookings } = useEvents();
+  const { categories, events,isCategoriesLoading, } = useEvents();
+
   return (
     <section className="py-16 px-4">
       <div className="max-w-7xl mx-auto">
@@ -88,9 +90,9 @@ export const EventGrid = ({ title, subtitle }: EventGridProps) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((event) => (
-            <a href={`/event/${event._id}`} key={event._id}>
+            <Link to={`/event/${event._id}`} key={event._id}>
               <EventCard {...event} />
-            </a>
+            </Link>
           ))}
         </div>
       </div>

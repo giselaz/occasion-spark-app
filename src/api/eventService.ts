@@ -1,6 +1,6 @@
 import { EventModel } from "@/types/event";
 import { axiosInstance} from "../lib/utils";
-import { AxiosResponse } from "axios";
+import { type AxiosResponse } from "axios";
 
 export const getAllEvents = async (): Promise<EventModel[]>=> { 
   try {
@@ -26,6 +26,22 @@ export const getAllEvents = async (): Promise<EventModel[]>=> {
   }
 };
 
+export const getEventById = async(eventId:string): Promise<EventModel | undefined>  =>
+{
+   try {
+    const res:AxiosResponse<EventModel> = await axiosInstance.get(`/events/details/${eventId}`);
+    const event = res.data;
+    const image = await getEventImage(event._id);
+    if(image.trim().length !==0)
+    {
+      return {...event,image}
+    } 
+    return res.data;
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 
  const getEventImage = async (eventId:string): Promise<string | undefined> => {
     try {
@@ -48,3 +64,5 @@ const blobToDataURL = (blob:Blob): Promise<string> => {
     reader.readAsDataURL(blob);
   });
 };
+
+

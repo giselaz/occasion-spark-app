@@ -5,12 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { EventCard } from "@/components/EventCard";
-import musicConcert from "@/assets/music-concert.jpg";
-import techConference from "@/assets/tech-conference.jpg";
-import artExhibition from "@/assets/art-exhibition.jpg";
-import foodFestival from "@/assets/food-festival.jpg";
-import fitnessWorkshop from "@/assets/fitness-workshop.jpg";
-
+import { useEvents } from "@/hooks/useEvents";
 const AllEvents = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -18,108 +13,21 @@ const AllEvents = () => {
   const [selectedDate, setSelectedDate] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
 
+  const {events ,categories } = useEvents();
   // Mock events data
-  const allEvents = [
-    {
-      id: "1",
-      title: "Summer Music Festival 2024",
-      image: musicConcert,
-      date: "Jun 15, 2024",
-      time: "7:00 PM",
-      location: "Central Park, New York",
-      price: "$45",
-      category: "Music",
-      attendees: 1250,
-    },
-    {
-      id: "2",
-      title: "Tech Innovation Summit",
-      image: techConference,
-      date: "Jun 20, 2024",
-      time: "9:00 AM",
-      location: "Convention Center, San Francisco",
-      price: "$120",
-      category: "Technology",
-      attendees: 800,
-    },
-    {
-      id: "3",
-      title: "Modern Art Showcase",
-      image: artExhibition,
-      date: "Jun 22, 2024",
-      time: "6:00 PM",
-      location: "Metropolitan Gallery, NYC",
-      price: "$25",
-      category: "Arts",
-      attendees: 350,
-    },
-    {
-      id: "4",
-      title: "Gourmet Food Festival",
-      image: foodFestival,
-      date: "Jun 25, 2024",
-      time: "12:00 PM",
-      location: "Brooklyn Bridge Park",
-      price: "$35",
-      category: "Food",
-      attendees: 950,
-    },
-    {
-      id: "5",
-      title: "Yoga & Wellness Workshop",
-      image: fitnessWorkshop,
-      date: "Jun 18, 2024",
-      time: "8:00 AM",
-      location: "Zen Studio, Los Angeles",
-      price: "$30",
-      category: "Health",
-      attendees: 85,
-    },
-    {
-      id: "6",
-      title: "Jazz Night Live",
-      image: musicConcert,
-      date: "Jun 28, 2024",
-      time: "8:30 PM",
-      location: "Blue Note, Chicago",
-      price: "$55",
-      category: "Music",
-      attendees: 200,
-    },
-    {
-      id: "7",
-      title: "Startup Pitch Competition",
-      image: techConference,
-      date: "Jul 05, 2024",
-      time: "2:00 PM",
-      location: "Innovation Hub, Austin",
-      price: "Free",
-      category: "Business",
-      attendees: 300,
-    },
-    {
-      id: "8",
-      title: "Photography Workshop",
-      image: artExhibition,
-      date: "Jul 10, 2024",
-      time: "10:00 AM",
-      location: "Studio Space, Seattle",
-      price: "$75",
-      category: "Arts",
-      attendees: 40,
-    }
-  ];
-
-  const categories = ["all", "Music", "Technology", "Arts", "Food", "Health", "Business"];
+ const filterCategories = [{id:"all",name:"All"},...categories.map(category => ({
+  id: category._id,
+  name: category.name,
+}))];
   const locations = ["all", "New York", "San Francisco", "Los Angeles", "Chicago", "Austin", "Seattle"];
   const dateRanges = ["all", "Today", "Tomorrow", "This Week", "This Month", "Next Month"];
   const priceRanges = ["all", "Free", "$1-$25", "$26-$50", "$51-$100", "$100+"];
 
   // Filter events based on selected criteria
-  const filteredEvents = allEvents.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredEvents = events.filter(event => {
+    const matchesSearch = event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          event.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || event.category === selectedCategory;
+    const matchesCategory = selectedCategory === "all" || event.category.filter(category=>(category.name === selectedCategory))
     const matchesLocation = selectedLocation === "all" || event.location.includes(selectedLocation);
     
     return matchesSearch && matchesCategory && matchesLocation;
@@ -168,7 +76,7 @@ const AllEvents = () => {
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Discover Events</h1>
           <p className="text-muted-foreground text-lg">
-            Find your next favorite event from {allEvents.length} amazing experiences
+            Find your next favorite event from {events.length} amazing experiences
           </p>
         </div>
 
@@ -197,9 +105,9 @@ const AllEvents = () => {
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map(category => (
-                  <SelectItem key={category} value={category}>
-                    {category === "all" ? "All Categories" : category}
+                {filterCategories.map(category => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.id === "all" ? "All Categories" : category.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -294,7 +202,7 @@ const AllEvents = () => {
         {filteredEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event) => (
-              <a href={`/event/${event.id}`} key={event.id}>
+              <a href={`/event/${event._id}`} key={event._id}>
                 <EventCard {...event} />
               </a>
             ))}
