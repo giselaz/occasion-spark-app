@@ -7,6 +7,7 @@ import techConference from "@/assets/tech-conference.jpg";
 import { useQuery } from "@tanstack/react-query"; 
 import { EventModel } from "@/types/event";
 import { getEventById } from "@/api/eventService";
+import { BookingModal } from "@/components/BookingModal";
 
 const EventDetails = () => {
   const { id } = useParams(); 
@@ -40,9 +41,11 @@ if(isLoading)
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
               </Button>
-              <Button className="gradient-primary text-white">
-                Get Tickets - ${event.fee}
-              </Button>
+              <BookingModal event={event}>
+                <Button className="gradient-primary text-white">
+                  Get Tickets - ${event.fee}
+                </Button>
+              </BookingModal>
             </div>
           </div>
         </div>
@@ -164,9 +167,11 @@ if(isLoading)
                 </div>
               </div>
 
-              <Button className="w-full gradient-primary text-white text-lg py-3 mb-3">
-                Get Tickets
-              </Button>
+              <BookingModal event={event}>
+                <Button className="w-full gradient-primary text-white text-lg py-3 mb-3">
+                  Get Tickets
+                </Button>
+              </BookingModal>
               
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1">
