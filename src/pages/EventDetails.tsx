@@ -1,23 +1,42 @@
 import { useParams } from "react-router-dom";
-import { Calendar, MapPin, Users, Clock, Share2, Heart, Tag } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Users,
+  Clock,
+  Share2,
+  Heart,
+  Tag,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import techConference from "@/assets/tech-conference.jpg";
-import { useQuery } from "@tanstack/react-query"; 
+import { useQuery } from "@tanstack/react-query";
 import { EventModel } from "@/types/event";
 import { getEventById } from "@/api/eventService";
+import {
+  DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/dialog";
 
 const EventDetails = () => {
-  const { id } = useParams(); 
-  const {data:event,isLoading,error} = useQuery<EventModel>({
-  queryKey:['single_event',id],
-  queryFn:()=> getEventById(id)
-});
-if(isLoading)
-{
-  return<> Event is loading...</>
-}
+  const { id } = useParams();
+  const {
+    data: event,
+    isLoading,
+    error,
+  } = useQuery<EventModel>({
+    queryKey: ["single_event", id],
+    queryFn: () => getEventById(id),
+  });
+  if (isLoading) {
+    return <> Event is loading...</>;
+  }
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -30,7 +49,7 @@ if(isLoading)
               </div>
               <span className="text-xl font-bold">EventHub</span>
             </a>
-            
+
             <div className="flex items-center gap-3">
               <Button variant="ghost">
                 <Heart className="w-4 h-4 mr-2" />
@@ -50,20 +69,19 @@ if(isLoading)
 
       {/* Hero Section */}
       <div className="relative h-96 overflow-hidden">
-        <img 
-          src={event.image} 
+        <img
+          src={event.image}
           alt={event.name}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        
+
         <div className="absolute bottom-6 left-6 text-white">
           <Badge variant="secondary" className="mb-3">
             <ul>
-              {event.category.map(cat => (
+              {event.category.map((cat) => (
                 <li>{cat.name}</li>
               ))}
-              
             </ul>
           </Badge>
           <h1 className="text-4xl font-bold mb-2">{event.name}</h1>
@@ -119,7 +137,9 @@ if(isLoading)
                 </div>
                 <div>
                   <p className="font-medium">{event.vendor.name}</p>
-                  <p className="text-sm text-muted-foreground">Event Organizer</p>
+                  <p className="text-sm text-muted-foreground">
+                    Event Organizer
+                  </p>
                 </div>
               </div>
             </Card>
@@ -141,7 +161,9 @@ if(isLoading)
                   <Calendar className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <p className="font-medium">{event.start_date}</p>
-                    <p className="text-sm text-muted-foreground">{event.end_date}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {event.end_date}
+                    </p>
                   </div>
                 </div>
 
@@ -167,7 +189,7 @@ if(isLoading)
               <Button className="w-full gradient-primary text-white text-lg py-3 mb-3">
                 Get Tickets
               </Button>
-              
+
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1">
                   <Heart className="w-4 h-4 mr-2" />
@@ -179,20 +201,24 @@ if(isLoading)
                 </Button>
               </div>
             </Card>
-
+           
             {/* Related Events */}
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">Similar Events</h3>
               <div className="space-y-4">
                 <div className="flex gap-3">
-                  <img 
-                    src={techConference} 
+                  <img
+                    src={techConference}
                     alt="Tech Summit"
                     className="w-16 h-16 object-cover rounded-lg"
                   />
                   <div className="flex-1">
-                    <h4 className="font-medium text-sm">Tech Innovation Summit</h4>
-                    <p className="text-xs text-muted-foreground">Jun 20, 2024</p>
+                    <h4 className="font-medium text-sm">
+                      Tech Innovation Summit
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      Jun 20, 2024
+                    </p>
                     <p className="text-xs text-primary font-medium">$120</p>
                   </div>
                 </div>
