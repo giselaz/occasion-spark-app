@@ -187,9 +187,6 @@ const EventDetails = () => {
                 </Button>
               </BookingModal>
               
-              <Button className="w-full gradient-primary text-white text-lg py-3 mb-3">
-                Get Tickets
-              </Button>
 
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1">
