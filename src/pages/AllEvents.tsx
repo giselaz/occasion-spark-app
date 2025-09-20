@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Filter, Calendar, MapPin, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,13 +6,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { EventCard } from "@/components/EventCard";
 import { useEvents } from "@/hooks/useEvents";
+import { useSearchParams } from "react-router-dom";
 const AllEvents = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
   const [selectedDate, setSelectedDate] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
+  const [searchParams] = useSearchParams();
+  const searchCategory = searchParams.get('category') || "";
 
+  useEffect(()=>{
+    if(searchCategory.trim() !=='')
+    {
+      setSelectedCategory(searchCategory);
+    }
+  },[searchCategory]);
+  
   const {events ,categories } = useEvents();
   // Mock events data
  const filterCategories = [{id:"all",name:"All"},...categories.map(category => ({

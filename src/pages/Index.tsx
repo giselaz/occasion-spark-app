@@ -21,7 +21,7 @@ const Index = () => {
             
             <div className="hidden md:flex items-center gap-8">
               <a href="/events" className="text-foreground hover:text-primary transition-colors">Browse Events</a>
-              <a href="#" className="text-foreground hover:text-primary transition-colors">Create Event</a>
+              <a href="/create-event" className="text-foreground hover:text-primary transition-colors">Create Event</a>
               <a href="#" className="text-foreground hover:text-primary transition-colors">Help</a>
             </div>
             
@@ -108,9 +108,11 @@ const Index = () => {
           <p className="text-xl text-white/90 mb-8">
             Join thousands of event organizers who trust EventHub to manage their events
           </p>
-          <Button size="lg" variant="secondary" className="px-8 py-3 text-lg font-semibold">
-            Start Creating Events
-          </Button>
+          <a href="/create-event">
+            <Button size="lg" variant="secondary" className="px-8 py-3 text-lg font-semibold">
+              Start Creating Events
+            </Button>
+          </a>
         </div>
       </section>
 
@@ -140,7 +142,7 @@ const Index = () => {
             <div>
               <h3 className="font-semibold mb-4">Organize</h3>
               <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Create Event</a></li>
+                <li><a href="/create-event" className="hover:text-primary transition-colors">Create Event</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Pricing</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Resources</a></li>
               </ul>

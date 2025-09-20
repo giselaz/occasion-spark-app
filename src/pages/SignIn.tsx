@@ -44,7 +44,7 @@ const SignIn = () => {
               Continue with Google
             </Button>
             <Button variant="outline" className="w-full h-12 text-left justify-start gap-3">
-              <div className="w-5 h-5 bg-gray-900 rounded flex items-center justify-center">
+              <div className="w-5 h-5 bg-gray-900 rounded flex items-center justify-center"> 
                 <span className="text-white text-xs font-bold">A</span>
               </div>
               Continue with Apple
