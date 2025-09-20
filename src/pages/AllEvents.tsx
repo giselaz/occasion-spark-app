@@ -25,9 +25,8 @@ const AllEvents = () => {
 
   // Filter events based on selected criteria
   const filteredEvents = events.filter(event => {
-    const matchesSearch = event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || event.category.filter(category=>(category.name === selectedCategory))
+    const matchesSearch = event.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || event.category.some(category=>(category._id === selectedCategory))
     const matchesLocation = selectedLocation === "all" || event.location.includes(selectedLocation);
     
     return matchesSearch && matchesCategory && matchesLocation;
@@ -169,7 +168,7 @@ const AllEvents = () => {
           <div className="flex flex-wrap gap-2">
             {selectedCategory !== "all" && (
               <Badge variant="secondary" className="flex items-center gap-1">
-                {selectedCategory}
+                {filterCategories.find(cat => cat.id === selectedCategory)?.name || selectedCategory}
                 <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedCategory("all")} />
               </Badge>
             )}
