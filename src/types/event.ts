@@ -49,8 +49,27 @@ export interface Booking {
 }
 
 export interface User {
-  id: string;
+  _id: string;
   name: string;
+  surname: string;
   email: string;
-  isAdmin: boolean;
+  password:string;
+  isVerified:boolean;
+  role: Role;
+};
+
+export interface UserRegistration{
+  user:User;
+  vendor:Partial<Vendor>;
 }
+export interface AuthResponse {
+  access_token: string;
+  refresh_token: string;
+  // user: User;
+}
+export interface LoginRequest {
+  email:string;
+  password:string;
+}
+
+export type Role = "admin" | "vendor" | "organizer" | "user";

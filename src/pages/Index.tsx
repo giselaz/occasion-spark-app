@@ -4,41 +4,13 @@ import { EventGrid } from "@/components/EventGrid";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Users, Calendar, MapPin } from "lucide-react";
 import heroEventImage from "@/assets/hero-event.jpg";
+import Navigation from "@/components/Navigation";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="relative z-20 bg-white/80 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-8 h-8 text-primary" />
-              <h1 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
-                EventHub
-              </h1>
-            </div>
-            
-            <div className="hidden md:flex items-center gap-8">
-              <a href="/events" className="text-foreground hover:text-primary transition-colors">Browse Events</a>
-              <a href="/create-event" className="text-foreground hover:text-primary transition-colors">Create Event</a>
-              <a href="#" className="text-foreground hover:text-primary transition-colors">Help</a>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <a href="/signin">
-                <Button variant="ghost">Sign In</Button>
-              </a>
-              <a href="/signup">
-                <Button className="gradient-primary text-white hover:shadow-medium transition-all">
-                  Sign Up
-                </Button>
-              </a>
-            </div>
-          </div>
-        </div>
-      </nav>
-
+      <Navigation/>
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div 
