@@ -119,8 +119,12 @@ const SignIn = () => {
               </a>
             </div>
 
-            <Button type="submit" className="w-full h-12 gradient-primary text-white text-base font-semibold">
-              Sign In
+            <Button 
+              type="submit" 
+              className="w-full h-12 gradient-primary text-white text-base font-semibold"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
 
