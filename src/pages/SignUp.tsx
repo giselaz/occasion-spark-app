@@ -9,11 +9,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isVendor, setIsVendor] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -31,18 +35,48 @@ const SignUp = () => {
     description: "",
   });
 
+  const { signup } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Authentication will be handled by Supabase integration
-    const signupData = {
-      ...formData,
-      accountType: isVendor ? 'vendor' : 'user'
-    };
-    console.log("Sign up attempt:", signupData);
+    setIsLoading(true);
+
+    try {
+      const signupData = {
+        ...formData,
+        accountType: isVendor ? 'vendor' as const : 'user' as const,
+      };
+
+      const result = await signup(signupData);
+      
+      if (result.success) {
+        toast({
+          title: "Account created successfully!",
+          description: "Welcome to EventHub. You can now start exploring events.",
+        });
+        navigate("/");
+      } else {
+        toast({
+          title: "Signup failed",
+          description: result.error || "Please check your information and try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const currentYear = new Date().getFullYear();
@@ -355,9 +389,14 @@ const SignUp = () => {
             <Button 
               type="submit" 
               className="w-full h-12 gradient-primary text-white text-base font-semibold"
-              disabled={!formData.agreeToTerms}
+              disabled={!formData.agreeToTerms || isLoading}
             >
-              {isVendor ? "Create Vendor Account" : "Create Account"}
+              {isLoading 
+                ? "Creating Account..." 
+                : isVendor 
+                  ? "Create Vendor Account" 
+                  : "Create Account"
+              }
             </Button>
           </form>
 
