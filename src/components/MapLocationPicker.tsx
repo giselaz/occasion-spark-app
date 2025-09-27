@@ -94,46 +94,154 @@ const MapLocationPicker = () => {
 //     }
 //   };
 
-//   useEffect(() => {
-//     if (apiKey) {
-//       initializeMap();
-//     }
+  useEffect(() => {
+    const timer = setTimeout(() => map.invalidateSize(), 100); // Forces Leaflet to recalc tiles
+       return () => clearTimeout(timer);
+  }, [map]);
 
-//     return () => {
-//       if (map.current) {
-//         map.current.remove();
-//       }
-//     };
-//   }, [apiKey]);
+  return null;
+}
+export default function SearchableMap() {
+  const position: LatLngExpression = [51.505, -0.09];
+  return (
+    <MapContainer center={position} zoom={10}       style={{ width: "100%", height: "100%" }}>
+      <SearchField />
+      <TileLayer
+        attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+    <MapResize />
+    </MapContainer>
+  );
+}
+const MapLocationPicker = ({
+  onLocationSelect,
+  selectedLocation,
+}: MapLocationPickerProps) => {
+  const [position, setPosition] = useState([51.505, -0.09]);
 
-//   if (!apiKey) {
-//     return (
-//       <div className="space-y-4">
-//         <div>
-//           <Label htmlFor="mapbox-token">Mapbox Public Token</Label>
-//           <Input
-//             id="mapbox-token"
-//             type="text"
-//             placeholder="Enter your Mapbox public token"
-//             value={apiKey}
-//             onChange={(e) => setApiKey(e.target.value)}
-//             className="mt-1"
-//           />
-//           <p className="text-sm text-muted-foreground mt-1">
-//             Get your token from{' '}
-//             <a
-//               href="https://mapbox.com"
-//               target="_blank"
-//               rel="noopener noreferrer"
-//               className="text-primary hover:underline"
-//             >
-//               mapbox.com
-//             </a>
-//           </p>
-//         </div>
-//       </div>
-//     );
-//   }
+  // const mapContainer = useRef<HTMLDivElement>(null);
+  // const map = useRef<mapboxgl.Map | null>(null);
+  // const marker = useRef<mapboxgl.Marker | null>(null);
+  // const [apiKey, setApiKey] = useState('');
+  // const [isMapReady, setIsMapReady] = useState(false);
+
+  // const initializeMap = () => {
+  //   if (!mapContainer.current || !apiKey.trim()) return;
+
+  //   mapboxgl.accessToken = apiKey;
+
+  //   map.current = new mapboxgl.Map({
+  //     container: mapContainer.current,
+  //     style: 'mapbox://styles/mapbox/light-v11',
+  //     center: [0, 0],
+  //     zoom: 2
+  //   });
+
+  //   map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+  //   // Get user's current location
+  //   if (navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         const { latitude, longitude } = position.coords;
+  //         map.current?.setCenter([longitude, latitude]);
+  //         map.current?.setZoom(12);
+
+  //         if (!selectedLocation) {
+  //           reverseGeocode(longitude, latitude);
+  //         }
+  //       },
+  //       (error) => {
+  //         console.log('Geolocation error:', error);
+  //       }
+  //     );
+  //   }
+
+  //   // Handle map clicks
+  //   map.current.on('click', (e) => {
+  //     const { lng, lat } = e.lngLat;
+  //     addMarker(lng, lat);
+  //     reverseGeocode(lng, lat);
+  //   });
+
+  //   // Set existing location if provided
+  //   if (selectedLocation) {
+  //     map.current.on('load', () => {
+  //       addMarker(selectedLocation.lng, selectedLocation.lat);
+  //       map.current?.setCenter([selectedLocation.lng, selectedLocation.lat]);
+  //       map.current?.setZoom(12);
+  //     });
+  //   }
+
+  //   setIsMapReady(true);
+  // };
+
+  // const addMarker = (lng: number, lat: number) => {
+  //   if (marker.current) {
+  //     marker.current.remove();
+  //   }
+
+  //   marker.current = new mapboxgl.Marker({ color: 'hsl(var(--primary))' })
+  //     .setLngLat([lng, lat])
+  //     .addTo(map.current!);
+  // };
+
+  // const reverseGeocode = async (lng: number, lat: number) => {
+  //   try {
+  //     const response = await fetch(
+  //       `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${apiKey}`
+  //     );
+  //     const data = await response.json();
+  //     const address = data.features[0]?.place_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+  //     onLocationSelect({ lat, lng, address });
+  //   } catch (error) {
+  //     console.error('Reverse geocoding error:', error);
+  //     onLocationSelect({ lat, lng, address: `${lat.toFixed(6)}, ${lng.toFixed(6)}` });
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (apiKey) {
+  //     initializeMap();
+  //   }
+
+  //   return () => {
+  //     if (map.current) {
+  //       map.current.remove();
+  //     }
+  //   };
+  // }, [apiKey]);
+
+  // if (!apiKey) {
+  //   return (
+  //     <div className="space-y-4">
+  //       <div>
+  //         <Label htmlFor="mapbox-token">Mapbox Public Token</Label>
+  //         <Input
+  //           id="mapbox-token"
+  //           type="text"
+  //           placeholder="Enter your Mapbox public token"
+  //           value={apiKey}
+  //           onChange={(e) => setApiKey(e.target.value)}
+  //           className="mt-1"
+  //         />
+  //         <p className="text-sm text-muted-foreground mt-1">
+  //           Get your token from{' '}
+  //           <a
+  //             href="https://mapbox.com"
+  //             target="_blank"
+  //             rel="noopener noreferrer"
+  //             className="text-primary hover:underline"
+  //           >
+  //             mapbox.com
+  //           </a>
+  //         </p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
 //   return (
 //     <div className="space-y-4">
@@ -169,4 +277,4 @@ const MapLocationPicker = () => {
 //   );
 };
 
-export default MapLocationPicker;
+// export default MapLocationPicker;

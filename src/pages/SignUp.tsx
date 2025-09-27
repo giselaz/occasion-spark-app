@@ -1,45 +1,54 @@
 import { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, User, Calendar } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { UserFormData,formSchema } from "@/lib/UserValidation";
+import { Switch } from "../components/ui/switch";
+import CreateVendor from "@/components/CreateVendor";
+import { useMutation } from "@tanstack/react-query";
+import { signUpApi } from "@/api/userService";
+import { useNavigate } from "react-router-dom";
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    birthMonth: "",
-    birthYear: "",
-    agreeToTerms: false,
-    receiveUpdates: false,
+  const [isVendor, setIsVendor] = useState(false);
+ 
+  const defaultValues:UserFormData = {
+      user:{
+        name:'',
+        surname:'',
+        isVerified:false,
+        email:'',
+        role:'user',
+        password:'',
+        confirmPassword:'',
+      },
+      vendor:{
+        name:'',
+        logo:'',
+        description:''
+      }
+    
+    } as UserFormData 
+   const navigate = useNavigate();
+  const {register,handleSubmit,formState:{errors}} = useForm<UserFormData>({defaultValues});
+  const { mutate, isPending, isSuccess, isError, error, data } = useMutation({
+    mutationFn: signUpApi,
+    onSuccess:()=>
+    {
+      navigate('/signin');
+    }
   });
-
-  const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Authentication will be handled by Supabase integration
-    console.log("Sign up attempt:", formData);
-  };
-
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 80 }, (_, i) => currentYear - 18 - i);
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
+    const onSubmit = (data:UserFormData) => {
+      const userData = data.user;
+        mutate(userData);
+    }
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -64,12 +73,6 @@ const SignUp = () => {
               </div>
               Continue with Google
             </Button>
-            <Button variant="outline" className="w-full h-12 text-left justify-start gap-3">
-              <div className="w-5 h-5 bg-gray-900 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold">A</span>
-              </div>
-              Continue with Apple
-            </Button>
           </div>
 
           <div className="relative mb-6">
@@ -80,7 +83,9 @@ const SignUp = () => {
           </div>
 
           {/* Sign Up Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+            {isError && <div className="p-4 bg-red-400">{error.message}</div>}
+            {isSuccess && <div className="p-4 bg-green-400">{JSON.stringify(data)}</div>}
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
@@ -88,28 +93,28 @@ const SignUp = () => {
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
-                    id="firstName"
+                    id="name"
                     type="text"
                     placeholder="First name"
-                    value={formData.firstName}
-                    onChange={(e) => handleInputChange("firstName", e.target.value)}
+                    {...register('user.name')}
                     className="pl-10 h-12"
-                    required
+                    error={errors.user?.name?.message.length !== 0}
                   />
+                  {errors.user?.name?.message && <p className="text-red-600">{errors.user.name?.message}</p> }
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
                 <Input
-                  id="lastName"
+                  id="surname"
                   type="text"
                   placeholder="Last name"
-                  value={formData.lastName}
-                  onChange={(e) => handleInputChange("lastName", e.target.value)}
+                  {...register('user.surname',{required:"Surname is required"})}
                   className="h-12"
-                  required
+                  error={errors.user?.surname?.message.length !== 0}
                 />
-              </div>
+                  {errors.user?.surname?.message && <p className="text-red-600">{errors.user.surname?.message}</p> }
+                </div>
             </div>
 
             {/* Email */}
@@ -120,48 +125,15 @@ const SignUp = () => {
                 <Input
                   id="email"
                   type="email"
+                  {...register('user.email',{required:"Email is required"})}
                   placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
                   className="pl-10 h-12"
-                  required
+                  error={errors.user?.email?.message.length !== 0}
                 />
+                {errors.user?.email?.message && <p className="text-red-600">{errors.user.email.message}</p> }
               </div>
             </div>
 
-            {/* Birth Date */}
-            <div className="space-y-2">
-              <Label>Date of Birth</Label>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 z-10" />
-                  <Select value={formData.birthMonth} onValueChange={(value) => handleInputChange("birthMonth", value)}>
-                    <SelectTrigger className="pl-10 h-12">
-                      <SelectValue placeholder="Month" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {months.map((month, index) => (
-                        <SelectItem key={month} value={month}>
-                          {month}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Select value={formData.birthYear} onValueChange={(value) => handleInputChange("birthYear", value)}>
-                  <SelectTrigger className="h-12">
-                    <SelectValue placeholder="Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
 
             {/* Password */}
             <div className="space-y-2">
@@ -172,11 +144,11 @@ const SignUp = () => {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Create a password"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  {...register('user.password')}
                   className="pl-10 pr-10 h-12"
-                  required
+                  error={errors.user?.password?.message.length !== 0}
                 />
+                {errors.user?.password?.message && <p className="text-red-600">{errors.user.password.message}</p> }
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -196,10 +168,8 @@ const SignUp = () => {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                   className="pl-10 pr-10 h-12"
-                  required
+                 {...register('user.confirmPassword')}
                 />
                 <button
                   type="button"
@@ -208,16 +178,32 @@ const SignUp = () => {
                 >
                   {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
+                {errors.user?.confirmPassword?.message &&  <p className="text-red-600">{errors.user?.confirmPassword.message}</p>}
               </div>
             </div>
-
+              {/* Is Vendor Check*/}
+            <div className="space-y-3 p-4 bg-muted/30 rounded-lg border">
+              <div className="flex justify-between items-start space-x-2">
+                <div>
+                    <Label htmlFor="isvendor" className="text-base font-medium">
+                      Want to register as Vendor
+                    </Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                      Enable if you want to create and manage events
+                    </p>
+                </div>
+                <Switch id="isvendor" checked={isVendor} onCheckedChange={setIsVendor}/>
+              </div>
+            </div>
+            {isVendor && <CreateVendor register={register} errors={errors}/>}
+            {/* Vendor form data*/}
             {/* Checkboxes */}
             <div className="space-y-3">
               <div className="flex items-start space-x-2">
                 <Checkbox 
                   id="terms" 
-                  checked={formData.agreeToTerms}
-                  onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked === true)}
+                  // checked={formData.agreeToTerms}
+                  // onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked === true)}
                   className="mt-1"
                 />
                 <Label htmlFor="terms" className="text-sm leading-relaxed">
@@ -227,26 +213,15 @@ const SignUp = () => {
                   <a href="#" className="text-primary hover:underline">Privacy Policy</a>
                 </Label>
               </div>
-              
-              <div className="flex items-start space-x-2">
-                <Checkbox 
-                  id="updates" 
-                  checked={formData.receiveUpdates}
-                  onCheckedChange={(checked) => handleInputChange("receiveUpdates", checked === true)}
-                  className="mt-1"
-                />
-                <Label htmlFor="updates" className="text-sm leading-relaxed">
-                  I'd like to receive updates about events and promotions
-                </Label>
-              </div>
             </div>
 
             <Button 
               type="submit" 
+              // disabled={isPending}
               className="w-full h-12 gradient-primary text-white text-base font-semibold"
-              disabled={!formData.agreeToTerms}
+              // disabled={!formData.agreeToTerms}
             >
-              Create Account
+                 {isPending ? "Signing up..." : "Create Account"}
             </Button>
           </form>
 

@@ -1,59 +1,61 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, MapPin, Users, DollarSign, Tag } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import MapLocationPicker from '@/components/MapLocationPicker';
-import { useToast } from '@/hooks/use-toast';
-
-const eventSchema = z.object({
-  name: z.string().min(1, 'Event name is required').max(100, 'Event name too long'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  category: z.string().min(1, 'Please select a category'),
-  startDate: z.string().min(1, 'Start date is required'),
-  endDate: z.string().min(1, 'End date is required'),
-  startTime: z.string().min(1, 'Start time is required'),
-  endTime: z.string().min(1, 'End time is required'),
-  capacity: z.string().transform((val) => parseInt(val)).pipe(z.number().min(1, 'Capacity must be at least 1')),
-  fee: z.string().transform((val) => parseFloat(val)).pipe(z.number().min(0, 'Fee cannot be negative')),
-  isFree: z.boolean(),
-  tags: z.string().optional(),
-});
-
-type EventFormData = z.infer<typeof eventSchema>;
+import { useState } from "react";
+import { useForm } from "react-hook-form"; 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import SearchableMap from "@/components/MapLocationPicker"; 
+import { useToast } from "@/hooks/use-toast";
+import { eventSchema } from "@/lib/eventValidation";
+import { type EventFormData } from "@/lib/eventValidation";
+import FormCard from "@/components/eventForm/FormCard";
 
 const CreateEvent = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number; address: string } | undefined>();
-  
+  const [selectedLocation, setSelectedLocation] = useState<
+    { lat: number; lng: number; address: string } | undefined
+  >();
+
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      name: '',
-      description: '',
-      category: '',
-      startDate: '',
-      endDate: '',
-      startTime: '',
-      endTime: '',
-      capacity: '',
-      fee: '',
+      name: "",
+      description: "",
+      category: "",
+      startDate: "",
+      endDate: "",
+      startTime: "",
+      endTime: "",
+      capacity: "",
+      fee: "",
       isFree: false,
-      tags: '',
+      tags: "",
+      location:{
+        latitute:51.505,
+        longitude:-0.09
+      }
     } as any,
   });
 
-  const isFree = form.watch('isFree');
+  const isFree = form.watch("isFree");
 
   const onSubmit = async (data: EventFormData) => {
     if (!selectedLocation) {
@@ -70,17 +72,17 @@ const CreateEvent = () => {
       const eventData = {
         ...data,
         location: selectedLocation,
-        tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
+        tags: data.tags ? data.tags.split(",").map((tag) => tag.trim()) : [],
       };
-      
-      console.log('Event data:', eventData);
-      
+
+      console.log("Event data:", eventData);
+
       toast({
         title: "Event created successfully!",
         description: "Your event has been created and is now live.",
       });
-      
-      navigate('/events');
+
+      navigate("/events");
     } catch (error) {
       toast({
         title: "Error creating event",
@@ -105,7 +107,9 @@ const CreateEvent = () => {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold">Create Event</h1>
-                <p className="text-muted-foreground">Share your amazing event with the world</p>
+                <p className="text-muted-foreground">
+                  Share your amazing event with the world
+                </p>
               </div>
             </div>
           </div>
@@ -113,192 +117,184 @@ const CreateEvent = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Basic Information */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* Basic Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Tag className="h-5 w-5" />
-                  <span>Basic Information</span>
-                </CardTitle>
-                <CardDescription>
-                  Tell us about your event
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Event Name</FormLabel>
+            <FormCard
+              title="Basic Information"
+              description="Tell us about your event"
+            >
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Event Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter event name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Event Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter event name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe your event..."
+                        className="min-h-[120px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
-                        <Input placeholder="Enter event name" {...field} />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      <SelectContent>
+                        <SelectItem value="music">Music</SelectItem>
+                        <SelectItem value="tech">Technology</SelectItem>
+                        <SelectItem value="business">Business</SelectItem>
+                        <SelectItem value="education">Education</SelectItem>
+                        <SelectItem value="sports">Sports</SelectItem>
+                        <SelectItem value="food">Food & Drink</SelectItem>
+                        <SelectItem value="art">Arts & Culture</SelectItem>
+                        <SelectItem value="wellness">
+                          Health & Wellness
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Describe your event..." 
-                          className="min-h-[120px]"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="music">Music</SelectItem>
-                          <SelectItem value="tech">Technology</SelectItem>
-                          <SelectItem value="business">Business</SelectItem>
-                          <SelectItem value="education">Education</SelectItem>
-                          <SelectItem value="sports">Sports</SelectItem>
-                          <SelectItem value="food">Food & Drink</SelectItem>
-                          <SelectItem value="art">Arts & Culture</SelectItem>
-                          <SelectItem value="wellness">Health & Wellness</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tags"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tags (optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter tags separated by commas" {...field} />
-                      </FormControl>
-                      <p className="text-sm text-muted-foreground">
-                        Add relevant tags to help people find your event
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags (optional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter tags separated by commas"
+                        {...field}
+                      />
+                    </FormControl>
+                    <p className="text-sm text-muted-foreground">
+                      Add relevant tags to help people find your event
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </FormCard>
             {/* Date and Time */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5" />
-                  <span>Date & Time</span>
-                </CardTitle>
-                <CardDescription>
-                  When will your event take place?
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="startDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Start Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="endDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>End Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="startTime"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Start Time</FormLabel>
-                        <FormControl>
-                          <Input type="time" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="endTime"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>End Time</FormLabel>
-                        <FormControl>
-                          <Input type="time" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Location */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MapPin className="h-5 w-5" />
-                  <span>Location</span>
-                </CardTitle>
-                <CardDescription>
-                  Where will your event take place?
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <MapLocationPicker
-                  onLocationSelect={setSelectedLocation}
-                  selectedLocation={selectedLocation}
+            <FormCard
+              title="Date & Time"
+              description="When will your event take place?"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Date</FormLabel> 
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </CardContent>
-            </Card>
 
+                <FormField
+                  control={form.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="startTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Time</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="endTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Time</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </FormCard>
+            {/* Location */}
+            <FormCard
+              title="Location"
+              description=" Where will your event take place?">
+                <div style={{ width: "100%", height: "600px" }}>
+                    <SearchableMap />
+                </div>
+            </FormCard>
             {/* Capacity and Pricing */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Users className="h-5 w-5" />
@@ -371,11 +367,15 @@ const CreateEvent = () => {
                   />
                 )}
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Submit Button */}
             <div className="flex justify-end space-x-4">
-              <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(-1)}
+              >
                 Cancel
               </Button>
               <Button type="submit" className="gradient-primary">

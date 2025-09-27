@@ -5,20 +5,42 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox"; 
-
+import { useForm } from "react-hook-form";
+import { LoginRequest } from "@/types/event";
+import { useAuth } from "@/store/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Authentication will be handled by Supabase integration
-    console.log("Sign in attempt:", { email, password, rememberMe });
-  };
-
+  const {register,formState:{errors},handleSubmit } = useForm<LoginRequest>();
+  const {login} = useAuth();
+  const navigate = useNavigate();
+  const {toast} = useToast();
+  const onSubmit = async (data:LoginRequest) => {
+    try {
+      const result = await login(data);
+      
+      if (result.success) {
+        toast({
+          title: "Welcome back!",
+          description: "You have been successfully signed in.",
+        });
+        navigate("/");
+      } else {
+        toast({
+          title: "Sign in failed",
+          description: result.error || "Please check your credentials and try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } 
+  }
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -43,12 +65,6 @@ const SignIn = () => {
               </div>
               Continue with Google
             </Button>
-            <Button variant="outline" className="w-full h-12 text-left justify-start gap-3">
-              <div className="w-5 h-5 bg-gray-900 rounded flex items-center justify-center"> 
-                <span className="text-white text-xs font-bold">A</span>
-              </div>
-              Continue with Apple
-            </Button>
           </div>
 
           <div className="relative mb-6">
@@ -59,7 +75,7 @@ const SignIn = () => {
           </div>
 
           {/* Email Sign In Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -68,8 +84,7 @@ const SignIn = () => {
                   id="email"
                   type="email"
                   placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register('email',{required:"Email is required"})}
                   className="pl-10 h-12"
                   required
                 />
@@ -84,8 +99,7 @@ const SignIn = () => {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                 {...register('password',{required:"Password is required"})}
                   className="pl-10 pr-10 h-12"
                   required
                 />
@@ -100,21 +114,17 @@ const SignIn = () => {
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="remember" 
-                  checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(checked === true)}
-                />
-                <Label htmlFor="remember" className="text-sm">Remember me</Label>
-              </div>
               <a href="#" className="text-sm text-primary hover:underline">
                 Forgot password?
               </a>
             </div>
 
-            <Button type="submit" className="w-full h-12 gradient-primary text-white text-base font-semibold">
-              Sign In
+            <Button 
+              type="submit" 
+              className="w-full h-12 gradient-primary text-white text-base font-semibold"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
 
