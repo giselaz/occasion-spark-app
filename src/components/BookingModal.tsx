@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { EventModel } from "@/types/event";
-import { Calendar, MapPin, Users, CreditCard } from "lucide-react";
+import { Calendar, MapPin, Users, CreditCard } from "lucide-react"; 
 
 interface BookingModalProps {
   event: EventModel;
