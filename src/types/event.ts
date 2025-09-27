@@ -73,3 +73,11 @@ export interface LoginRequest {
 }
 
 export type Role = "admin" | "vendor" | "organizer" | "user";
+
+export interface Error {
+  error: string;
+}
+
+export interface Success {
+  message: string;
+}
