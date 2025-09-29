@@ -1,219 +1,152 @@
-import React, { useEffect, useRef, useState } from "react";
-import type { LatLngExpression } from "leaflet";
+import React, { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { MapPin } from 'lucide-react';
 
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
+// Fix for default markers in React-Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 interface MapLocationPickerProps {
-  onLocationSelect: (location: {
-    lat: number;
-    lng: number;
-    address: string;
-  }) => void;
+  onLocationSelect: (location: { lat: number; lng: number; address: string }) => void;
   selectedLocation?: { lat: number; lng: number; address: string };
 }
-function SearchField() {
-  const map = useMap();
 
-  useEffect(() => {
-    const provider = new OpenStreetMapProvider();
-
-    const searchControl = GeoSearchControl({
-      provider,
-      style: "bar",
-      showMarker: true,
-      showPopup: true,
-    });
-    map.addControl(searchControl);
-
-    return () => {map.removeControl(searchControl)};
-  }, [map]);
-  return null;
+interface LocationMarkerProps {
+  position: [number, number] | null;
+  onLocationSelect: (lat: number, lng: number) => void;
 }
-function MapResize() {
-  const map = useMap();
 
-  useEffect(() => {
-    const timer = setTimeout(() => map.invalidateSize(), 100); // Forces Leaflet to recalc tiles
-       return () => clearTimeout(timer);
-  }, [map]);
+const LocationMarker: React.FC<LocationMarkerProps> = ({ position, onLocationSelect }) => {
+  useMapEvents({
+    click(e) {
+      const { lat, lng } = e.latlng;
+      onLocationSelect(lat, lng);
+    },
+  });
 
-  return null;
-}
-export default function SearchableMap() {
-  const position: LatLngExpression = [51.505, -0.09];
-  return (
-    <MapContainer center={position} zoom={10}       style={{ width: "100%", height: "100%" }}>
-      <SearchField />
-      <TileLayer
-        attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-    <MapResize />
-    </MapContainer>
-  );
-}
-const MapLocationPicker = ({
-  onLocationSelect,
-  selectedLocation,
-}: MapLocationPickerProps) => {
-  const [position, setPosition] = useState([51.505, -0.09]);
-
-  // const mapContainer = useRef<HTMLDivElement>(null);
-  // const map = useRef<mapboxgl.Map | null>(null);
-  // const marker = useRef<mapboxgl.Marker | null>(null);
-  // const [apiKey, setApiKey] = useState('');
-  // const [isMapReady, setIsMapReady] = useState(false);
-
-  // const initializeMap = () => {
-  //   if (!mapContainer.current || !apiKey.trim()) return;
-
-  //   mapboxgl.accessToken = apiKey;
-
-  //   map.current = new mapboxgl.Map({
-  //     container: mapContainer.current,
-  //     style: 'mapbox://styles/mapbox/light-v11',
-  //     center: [0, 0],
-  //     zoom: 2
-  //   });
-
-  //   map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-  //   // Get user's current location
-  //   if (navigator.geolocation) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       (position) => {
-  //         const { latitude, longitude } = position.coords;
-  //         map.current?.setCenter([longitude, latitude]);
-  //         map.current?.setZoom(12);
-
-  //         if (!selectedLocation) {
-  //           reverseGeocode(longitude, latitude);
-  //         }
-  //       },
-  //       (error) => {
-  //         console.log('Geolocation error:', error);
-  //       }
-  //     );
-  //   }
-
-  //   // Handle map clicks
-  //   map.current.on('click', (e) => {
-  //     const { lng, lat } = e.lngLat;
-  //     addMarker(lng, lat);
-  //     reverseGeocode(lng, lat);
-  //   });
-
-  //   // Set existing location if provided
-  //   if (selectedLocation) {
-  //     map.current.on('load', () => {
-  //       addMarker(selectedLocation.lng, selectedLocation.lat);
-  //       map.current?.setCenter([selectedLocation.lng, selectedLocation.lat]);
-  //       map.current?.setZoom(12);
-  //     });
-  //   }
-
-  //   setIsMapReady(true);
-  // };
-
-  // const addMarker = (lng: number, lat: number) => {
-  //   if (marker.current) {
-  //     marker.current.remove();
-  //   }
-
-  //   marker.current = new mapboxgl.Marker({ color: 'hsl(var(--primary))' })
-  //     .setLngLat([lng, lat])
-  //     .addTo(map.current!);
-  // };
-
-  // const reverseGeocode = async (lng: number, lat: number) => {
-  //   try {
-  //     const response = await fetch(
-  //       `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${apiKey}`
-  //     );
-  //     const data = await response.json();
-  //     const address = data.features[0]?.place_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-
-  //     onLocationSelect({ lat, lng, address });
-  //   } catch (error) {
-  //     console.error('Reverse geocoding error:', error);
-  //     onLocationSelect({ lat, lng, address: `${lat.toFixed(6)}, ${lng.toFixed(6)}` });
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (apiKey) {
-  //     initializeMap();
-  //   }
-
-  //   return () => {
-  //     if (map.current) {
-  //       map.current.remove();
-  //     }
-  //   };
-  // }, [apiKey]);
-
-  // if (!apiKey) {
-  //   return (
-  //     <div className="space-y-4">
-  //       <div>
-  //         <Label htmlFor="mapbox-token">Mapbox Public Token</Label>
-  //         <Input
-  //           id="mapbox-token"
-  //           type="text"
-  //           placeholder="Enter your Mapbox public token"
-  //           value={apiKey}
-  //           onChange={(e) => setApiKey(e.target.value)}
-  //           className="mt-1"
-  //         />
-  //         <p className="text-sm text-muted-foreground mt-1">
-  //           Get your token from{' '}
-  //           <a
-  //             href="https://mapbox.com"
-  //             target="_blank"
-  //             rel="noopener noreferrer"
-  //             className="text-primary hover:underline"
-  //           >
-  //             mapbox.com
-  //           </a>
-  //         </p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // return (
-  //   <div className="space-y-4">
-  //     <div className="relative">
-  //       <div
-  //         ref={mapContainer}
-  //         className="w-full h-64 rounded-lg border border-input bg-background"
-  //       />
-  //       {!isMapReady && (
-  //         <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg">
-  //           <div className="flex items-center space-x-2 text-muted-foreground">
-  //             <MapPin className="h-5 w-5" />
-  //             <span>Loading map...</span>
-  //           </div>
-  //         </div>
-  //       )}
-  //     </div>
-
-  //     {selectedLocation && (
-  //       <div className="p-3 bg-muted rounded-lg">
-  //         <p className="text-sm font-medium">Selected Location:</p>
-  //         <p className="text-sm text-muted-foreground">{selectedLocation.address}</p>
-  //         <p className="text-xs text-muted-foreground">
-  //           {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
-  //         </p>
-  //       </div>
-  //     )}
-
-  //     <p className="text-sm text-muted-foreground">
-  //       Click on the map to select a location for your event
-  //     </p>
-  //   </div>
-  // );
+  return position ? <Marker position={position} /> : null;
 };
 
-// export default MapLocationPicker;
+const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
+  onLocationSelect,
+  selectedLocation,
+}) => {
+  const [position, setPosition] = useState<[number, number] | null>(
+    selectedLocation ? [selectedLocation.lat, selectedLocation.lng] : null
+  );
+  const [searchAddress, setSearchAddress] = useState(selectedLocation?.address || '');
+
+  const handleLocationClick = async (lat: number, lng: number) => {
+    setPosition([lat, lng]);
+    
+    // Simple reverse geocoding using OpenStreetMap Nominatim
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+      );
+      const data = await response.json();
+      const address = data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+      
+      setSearchAddress(address);
+      onLocationSelect({ lat, lng, address });
+    } catch (error) {
+      console.error('Reverse geocoding error:', error);
+      const address = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+      setSearchAddress(address);
+      onLocationSelect({ lat, lng, address });
+    }
+  };
+
+  const handleAddressSearch = async () => {
+    if (!searchAddress.trim()) return;
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`
+      );
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const { lat, lon } = data[0];
+        const newPosition: [number, number] = [parseFloat(lat), parseFloat(lon)];
+        setPosition(newPosition);
+        onLocationSelect({ lat: parseFloat(lat), lng: parseFloat(lon), address: searchAddress });
+      }
+    } catch (error) {
+      console.error('Address search error:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedLocation) {
+      setPosition([selectedLocation.lat, selectedLocation.lng]);
+      setSearchAddress(selectedLocation.address);
+    }
+  }, [selectedLocation]);
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="address-search">Search Location</Label>
+        <div className="flex gap-2">
+          <Input
+            id="address-search"
+            type="text"
+            placeholder="Enter an address or place name"
+            value={searchAddress}
+            onChange={(e) => setSearchAddress(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleAddressSearch()}
+            className="flex-1"
+          />
+          <button
+            type="button"
+            onClick={handleAddressSearch}
+            className="px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Search
+          </button>
+        </div>
+      </div>
+
+      <div className="relative">
+        <div className="w-full h-64 rounded-lg border border-input overflow-hidden">
+          <MapContainer
+            center={position || [51.505, -0.09]}
+            zoom={position ? 15 : 10}
+            style={{ width: '100%', height: '100%' }}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <LocationMarker position={position} onLocationSelect={handleLocationClick} />
+          </MapContainer>
+        </div>
+      </div>
+      
+      {selectedLocation && (
+        <div className="p-3 bg-muted rounded-lg">
+          <p className="text-sm font-medium">Selected Location:</p>
+          <p className="text-sm text-muted-foreground">{selectedLocation.address}</p>
+          <p className="text-xs text-muted-foreground">
+            {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
+          </p>
+        </div>
+      )}
+      
+      <p className="text-sm text-muted-foreground">
+        Click on the map to select a location for your event
+      </p>
+    </div>
+  );
+};
+
+export default MapLocationPicker;

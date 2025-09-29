@@ -7,16 +7,18 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useForm } from "react-hook-form";
 import { LoginRequest } from "@/types/event";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const {register,formState:{errors},handleSubmit } = useForm<LoginRequest>();
   const {login} = useAuth();
   const navigate = useNavigate();
   const {toast} = useToast();
   const onSubmit = async (data:LoginRequest) => {
+    setIsLoading(true);
     try {
       const result = await login(data);
       
@@ -39,7 +41,9 @@ const SignIn = () => {
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-    } 
+    } finally {
+      setIsLoading(false);
+    }
   }
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">

@@ -1,7 +1,7 @@
 import { Button } from "./ui/button";
 import { Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/store/AuthContext";
+import { useAuth } from '@/contexts/AuthContext';
 function Navigation() {
   const { isAuthenticated } = useAuth();
   return (

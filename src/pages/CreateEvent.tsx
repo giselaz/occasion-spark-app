@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import SearchableMap from "@/components/MapLocationPicker"; 
+import MapLocationPicker from "@/components/MapLocationPicker"; 
 import { useToast } from "@/hooks/use-toast";
 import { eventSchema } from "@/lib/eventValidation";
 import { type EventFormData } from "@/lib/eventValidation";
@@ -290,7 +290,13 @@ const CreateEvent = () => {
               title="Location"
               description=" Where will your event take place?">
                 <div style={{ width: "100%", height: "600px" }}>
-                    <SearchableMap />
+                    <MapLocationPicker 
+                      onLocationSelect={(location) => {
+                        form.setValue('location', location.address);
+                        setSelectedLocation(location);
+                      }}
+                      selectedLocation={selectedLocation}
+                    />
                 </div>
             </FormCard>
             {/* Capacity and Pricing */}

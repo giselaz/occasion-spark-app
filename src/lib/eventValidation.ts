@@ -13,5 +13,6 @@ export const eventSchema = z.object({
   fee: z.string().transform((val) => parseFloat(val)).pipe(z.number().min(0, 'Fee cannot be negative')),
   isFree: z.boolean(),
   tags: z.string().optional(),
+  location: z.string().optional(),
 });
 export type EventFormData = z.infer<typeof eventSchema>;
