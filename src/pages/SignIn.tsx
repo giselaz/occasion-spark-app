@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useForm } from "react-hook-form";
 import { LoginRequest } from "@/types/event";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/store/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 const SignIn = () => {
@@ -126,9 +126,9 @@ const SignIn = () => {
             <Button 
               type="submit" 
               className="w-full h-12 gradient-primary text-white text-base font-semibold"
-              // disabled={isLoading}
+              disabled={isLoading}
             >
-              Sign In 
+             {isLoading ? "Signing In" : "Sign In"}  
             </Button>
           </form>
 

@@ -4,13 +4,12 @@ import { EventGrid } from "@/components/EventGrid";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Users, Calendar, MapPin } from "lucide-react";
 import heroEventImage from "@/assets/hero-event.jpg";
-import Navigation from "@/components/Navigation";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <Navigation/>
+  
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div 

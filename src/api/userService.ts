@@ -3,7 +3,7 @@ import { axiosInstance } from "../lib/utils";
 import axios, { AxiosResponse } from "axios";
 export const signUpApi = async (data: Partial<User>) => {
   try {
-    const response: AxiosResponse<string> = await axiosInstance.post(
+    const response: AxiosResponse<string> = await axiosInstance.post( 
       "/users/signup",
       data
     );
@@ -20,7 +20,8 @@ export const login = async (data: LoginRequest) => {
   try {
     const response: AxiosResponse<AuthResponse> = await axiosInstance.post(
       "/auth/login",
-      data
+      data,
+      { withCredentials: true } 
     );
     return response;
   } catch (err) {
@@ -31,10 +32,13 @@ export const login = async (data: LoginRequest) => {
   }
 };
 
-export const generateAccess = async (token: string) => {
+export const generateAccess = async () => {
   try {
-    const response: AxiosResponse<string> = await axiosInstance.post(
-      "auth/refresh-token"
+    const response: AxiosResponse<{access_token:string}> = await axiosInstance.post(
+      "auth/refresh-token",
+       {},
+      { withCredentials: true } 
     );
+    return response.data;
   } catch (err) {}
 };

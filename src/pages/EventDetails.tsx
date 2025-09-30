@@ -32,35 +32,7 @@ const EventDetails = () => {
   }
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <a href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">E</span>
-              </div>
-              <span className="text-xl font-bold">EventHub</span>
-            </a>
 
-            <div className="flex items-center gap-3">
-              <Button variant="ghost">
-                <Heart className="w-4 h-4 mr-2" />
-                Save
-              </Button>
-              <Button variant="ghost">
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
-              </Button>
-              <BookingModal event={event}>
-                <Button className="gradient-primary text-white">
-                  Get Tickets - ${event.fee}
-                </Button>
-              </BookingModal>
-            </div>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <div className="relative h-96 overflow-hidden">

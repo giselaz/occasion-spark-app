@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/store/AuthContext';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -10,9 +10,15 @@ import { Booking, EventModel } from '@/types/event';
 import { format } from 'date-fns';
 
 const UserProfile = () => {
-  const { user, logout } = useAuth();
+  const { token } = useAuth();
   const [activeTab, setActiveTab] = useState('upcoming');
-
+const user ={
+  firstName:'admin',
+  lastName:'test',
+  email:"giselazaimi@gmail.com",
+  id:'22',
+  accountType:"vendor"
+}
   // Mock data - replace with actual API calls
   const mockBookings: Booking[] = [
     {
@@ -130,7 +136,6 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
       
       <div className="container mx-auto px-4 py-8">
         {/* Profile Header */}
@@ -156,7 +161,7 @@ const UserProfile = () => {
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
                 </Button>
-                <Button variant="outline" size="sm" onClick={logout}>
+                <Button variant="outline" size="sm" >
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </Button>

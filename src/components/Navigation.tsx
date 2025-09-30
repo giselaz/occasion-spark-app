@@ -1,7 +1,7 @@
 import { Button } from "./ui/button";
 import { Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/store/AuthContext';
 function Navigation() {
   const { isAuthenticated } = useAuth();
   return (
@@ -11,7 +11,7 @@ function Navigation() {
           <div className="flex items-center gap-2">
             <Sparkles className="w-8 h-8 text-primary" />
             <h1 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
-              EventHub
+              <Link to='/'>EventHub</Link>
             </h1>
           </div>
 
@@ -37,7 +37,7 @@ function Navigation() {
           </div>
 
           <div className="flex items-center gap-3">
-            {isAuthenticated && (
+            {!isAuthenticated ? (
               <>
                 {" "}
                 <Link to="/signin">
@@ -49,7 +49,11 @@ function Navigation() {
                   </Button>
                 </Link>
               </>
-            )}
+            ):
+            <Link className="bg-primary  p-2 text-primary-foreground hover:bg-primary/90 rounded-sm" to='/dashboard'>
+              Dashboard
+            </Link>
+          }
           </div>
         </div>
       </div>

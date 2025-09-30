@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { login as loginApi } from '@/api/userService';
-// import { getAccessToken, setAccessToken, removeAccessToken } from '@/utils/tokenStorage';
-import { LoginRequest,UserRegistration,User,AuthResponse } from '@/types/event';
+import { LoginRequest, } from '@/types/event';
+import { setupInterceptors } from '@/api/Interceptor';
+import { generateAccess } from '@/api/userService';
 interface AuthContextType {
   // user: Partial<User> | null;
   isAuthenticated: boolean;
@@ -9,7 +10,7 @@ interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<{ success: boolean; error?: string }>;
   token:string;
 //   signup: (data: UserRegistration) => Promise<{ success: boolean; error?: string }>;
-//   logout: () => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,28 +33,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const isAuthenticated = !!token;
 
-  // Check for existing token on app load
-//   useEffect(() => {
-//     const checkAuthStatus = async () => {
-//       const token = getAccessToken();
-//       if (token) {
-//         try {
-//           const userData = await authService.getCurrentUser();
-//           setUser(userData);
-//         } catch (error) {
-//           // Token might be expired or invalid
-//           removeAccessToken();
-//         }
-//       }
-//       setIsLoading(false);
-//     };
+   useEffect(() => {
+    const tryRefresh = async () => {
+      try {
+        const response = await generateAccess();
+        setToken(response.access_token);
+      } catch (err) {
+        setToken(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-//     checkAuthStatus();
-//   }, []);
+    tryRefresh();
+  }, []);
+  // Check for existing token on app load 
+  useEffect(() => {
+    setupInterceptors(
+      () => token,        // getter
+      (t) => setToken(t), // setter
+      logout              // handle refresh failure
+    );
+  }, [token]);
+
 
   const login = async (credentials: LoginRequest): Promise<{ success: boolean; error?: string }> => {
     try {
       const response = await loginApi(credentials);
+      
       setToken(response.data.access_token);
       // setUser(response.data.user);
       return { success: true };
@@ -79,18 +86,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 //     }
 //   };
 
-//   const logout = () => {
-//     removeAccessToken();
-//     setUser(null);
-//     // Optional: Call API to invalidate refresh token
-//     authService.logout();
-//   };
+  const logout = () => {
+    setToken("");
+  }
+    // Optional: Call API to invalidate refresh token  };
 
   const value: AuthContextType = {
     isAuthenticated,
     isLoading,
     login,
-    token
+    token,
+    logout
    
   };
 
