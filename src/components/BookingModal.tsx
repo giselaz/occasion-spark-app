@@ -5,9 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { EventModel } from "@/types/event";
-import { Calendar, MapPin, CreditCard, Loader2 } from "lucide-react";
-import { createCheckoutSession } from "@/api/stripeService";
+import { Calendar, MapPin, Loader2 } from "lucide-react";
+import { createPaymentIntent } from "@/api/stripeService";
 import { useToast } from "@/hooks/use-toast";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import { StripeCheckoutForm } from "./StripeCheckoutForm";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "pk_test_placeholder");
 
 interface BookingModalProps {
   event: EventModel;
@@ -20,14 +25,16 @@ export const BookingModal = ({ event, children }: BookingModalProps) => {
   const [attendeeEmail, setAttendeeEmail] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
   const { toast } = useToast();
 
   const totalAmount = event.fee * ticketCount;
 
-  const handleBooking = async () => {
+  const handleContinueToPayment = async () => {
     setIsProcessing(true);
     try {
-      const checkoutUrl = await createCheckoutSession({
+      const secret = await createPaymentIntent({
         eventId: event._id,
         eventName: event.name,
         ticketCount,
@@ -36,24 +43,32 @@ export const BookingModal = ({ event, children }: BookingModalProps) => {
         attendeeEmail,
       });
 
-      // Redirect to Stripe Checkout
-      window.open(checkoutUrl, "_blank");
-      
-      toast({
-        title: "Redirecting to checkout",
-        description: "You'll be taken to Stripe to complete your payment.",
-      });
-      
-      setIsOpen(false);
+      setClientSecret(secret);
+      setShowPayment(true);
     } catch (error) {
       toast({
-        title: "Booking failed",
-        description: "Unable to process your booking. Please try again.",
+        title: "Setup failed",
+        description: "Unable to initialize payment. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handlePaymentSuccess = () => {
+    setIsOpen(false);
+    setShowPayment(false);
+    setClientSecret(null);
+    setAttendeeName("");
+    setAttendeeEmail("");
+    setTicketCount(1);
+  };
+
+  const handleCancel = () => {
+    setIsOpen(false);
+    setShowPayment(false);
+    setClientSecret(null);
   };
 
   return (
@@ -86,103 +101,112 @@ export const BookingModal = ({ event, children }: BookingModalProps) => {
 
         <Separator />
 
-        {/* Booking Form */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              placeholder="Enter your full name"
-              value={attendeeName}
-              onChange={(e) => setAttendeeName(e.target.value)}
-            />
-          </div>
+        {!showPayment ? (
+          <>
+            {/* Booking Form */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  placeholder="Enter your full name"
+                  value={attendeeName}
+                  onChange={(e) => setAttendeeName(e.target.value)}
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={attendeeEmail}
-              onChange={(e) => setAttendeeEmail(e.target.value)}
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={attendeeEmail}
+                  onChange={(e) => setAttendeeEmail(e.target.value)}
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tickets">Number of Tickets</Label>
-            <div className="flex items-center gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="tickets">Number of Tickets</Label>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setTicketCount(Math.max(1, ticketCount - 1))}
+                  >
+                    -
+                  </Button>
+                  <Input
+                    id="tickets"
+                    type="number"
+                    min="1"
+                    value={ticketCount}
+                    onChange={(e) => setTicketCount(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-20 text-center"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setTicketCount(ticketCount + 1)}
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Pricing Summary */}
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span>Ticket Price</span>
+                <span>${event.fee}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Quantity</span>
+                <span>{ticketCount}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-lg">
+                <span>Total</span>
+                <span>${totalAmount}</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
               <Button
                 variant="outline"
-                size="icon"
-                onClick={() => setTicketCount(Math.max(1, ticketCount - 1))}
+                className="flex-1"
+                onClick={handleCancel}
               >
-                -
+                Cancel
               </Button>
-              <Input
-                id="tickets"
-                type="number"
-                min="1"
-                value={ticketCount}
-                onChange={(e) => setTicketCount(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-20 text-center"
-              />
               <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setTicketCount(ticketCount + 1)}
+                className="flex-1"
+                onClick={handleContinueToPayment}
+                disabled={!attendeeName || !attendeeEmail || isProcessing}
               >
-                +
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Continue to Payment"
+                )}
               </Button>
             </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Pricing Summary */}
-        <div className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span>Ticket Price</span>
-            <span>${event.fee}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Quantity</span>
-            <span>{ticketCount}</span>
-          </div>
-          <div className="flex justify-between font-semibold text-lg">
-            <span>Total</span>
-            <span>${totalAmount}</span>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-3 pt-4">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => setIsOpen(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            className="flex-1"
-            onClick={handleBooking}
-            disabled={!attendeeName || !attendeeEmail || isProcessing}
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              <>
-                <CreditCard className="w-4 h-4 mr-2" />
-                Proceed to Payment
-              </>
-            )}
-          </Button>
-        </div>
+          </>
+        ) : clientSecret ? (
+          <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <StripeCheckoutForm
+              onSuccess={handlePaymentSuccess}
+              onCancel={handleCancel}
+              totalAmount={totalAmount}
+            />
+          </Elements>
+        ) : null}
       </DialogContent>
     </Dialog>
   );
