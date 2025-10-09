@@ -25,7 +25,7 @@ export const setupInterceptors = (
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
         try {
-          // 🔄 Request new access token (refresh cookie is sent automatically)
+          //  Request new access token (refresh cookie is sent automatically)
           const res = await generateAccess();
           const newAccessToken = res.access_token;
 

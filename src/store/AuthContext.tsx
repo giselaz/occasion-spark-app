@@ -30,16 +30,17 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [token,setToken] = useState<string>('');
-
-  const isAuthenticated = !!token;
+  const [isAuthenticated,setIsAuthenticated] = useState(false);
 
    useEffect(() => {
     const tryRefresh = async () => {
       try {
         const response = await generateAccess();
         setToken(response.access_token);
-      } catch (err) {
+        setIsAuthenticated(true);
+      } catch (err) { 
         setToken(null);
+        setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }
@@ -67,12 +68,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Login failed' 
+        error: error instanceof Error ? error.message : 'Login failed'  
       };
     }
   };
 
-//   const signup = async (data: SignupRequest): Promise<{ success: boolean; error?: string }> => {
+//   const signup = async (data: SignupRequest): Promise<{ success: boolean; error?: string }> => { 
 //     try {
 //       const response = await authService.signup(data);
 //       setAccessToken(response.access_token);
