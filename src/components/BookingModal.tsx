@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { EventModel } from "@/types/event";
-import { Calendar, MapPin, Users, CreditCard } from "lucide-react"; 
+import { Calendar, MapPin, CreditCard, Loader2 } from "lucide-react";
+import { createCheckoutSession } from "@/api/stripeService";
+import { useToast } from "@/hooks/use-toast";
 
 interface BookingModalProps {
   event: EventModel;
@@ -17,19 +19,41 @@ export const BookingModal = ({ event, children }: BookingModalProps) => {
   const [attendeeName, setAttendeeName] = useState("");
   const [attendeeEmail, setAttendeeEmail] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
   const totalAmount = event.fee * ticketCount;
 
-  const handleBooking = () => {
-    // Handle booking logic here
-    console.log("Booking details:", {
-      eventId: event._id,
-      attendeeName,
-      attendeeEmail,
-      ticketCount,
-      totalAmount
-    });
-    setIsOpen(false);
+  const handleBooking = async () => {
+    setIsProcessing(true);
+    try {
+      const checkoutUrl = await createCheckoutSession({
+        eventId: event._id,
+        eventName: event.name,
+        ticketCount,
+        pricePerTicket: event.fee,
+        attendeeName,
+        attendeeEmail,
+      });
+
+      // Redirect to Stripe Checkout
+      window.open(checkoutUrl, "_blank");
+      
+      toast({
+        title: "Redirecting to checkout",
+        description: "You'll be taken to Stripe to complete your payment.",
+      });
+      
+      setIsOpen(false);
+    } catch (error) {
+      toast({
+        title: "Booking failed",
+        description: "Unable to process your booking. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -142,12 +166,21 @@ export const BookingModal = ({ event, children }: BookingModalProps) => {
             Cancel
           </Button>
           <Button
-            className="flex-1 gradient-primary text-white"
+            className="flex-1"
             onClick={handleBooking}
-            disabled={!attendeeName || !attendeeEmail}
+            disabled={!attendeeName || !attendeeEmail || isProcessing}
           >
-            <CreditCard className="w-4 h-4 mr-2" />
-            Complete Booking
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <CreditCard className="w-4 h-4 mr-2" />
+                Proceed to Payment
+              </>
+            )}
           </Button>
         </div>
       </DialogContent>
