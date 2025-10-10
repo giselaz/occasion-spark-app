@@ -20,7 +20,7 @@ export const createCheckoutSession = async (
 ): Promise<string> => {
   try {
     const response: AxiosResponse<CheckoutResponse> = await axiosInstance.post(
-      "/stripe/create-checkout",
+      "booking/bookEvent",
       data
     );
     return response.data.url;
