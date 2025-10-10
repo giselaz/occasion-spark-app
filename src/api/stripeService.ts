@@ -35,7 +35,7 @@ export const createCheckoutSession = async (
   }
 };
 
-export const createPaymentIntent = async (
+export const createPaymentIntent = async ( 
   data: CreateCheckoutRequest
 ): Promise<string> => {
   try {
