@@ -3,10 +3,9 @@ import { AxiosResponse } from "axios";
 
 export interface CreateCheckoutRequest {
   eventId: string;
-  eventName: string;
-  ticketCount: number;
-  pricePerTicket: number;
-  attendeeName: string;
+   quantity: number;
+  // pricePerTicket: number;
+  // attendeeName: string;
   attendeeEmail: string;
 }
 
@@ -25,9 +24,10 @@ export const createCheckoutSession = async (
 ): Promise<string> => {
   try {
     const response: AxiosResponse<CheckoutResponse> = await axiosInstance.post(
-      "booking/bookEvent",
+      "bookings/bookEvent",
       data
     );
+    // console.log(response.data.)
     return response.data.url;
   } catch (err) {
     console.error("Error creating checkout session:", err);

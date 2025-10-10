@@ -10,7 +10,7 @@ import {
 
 interface CreateVendorProps {
   register: UseFormRegister<UserFormData>;
-  errors: FieldErrors<UserFormData>;
+  errors: FieldErrors<UserFormData>; 
 
 }
 function CreateVendor({ register, errors, }: CreateVendorProps) {

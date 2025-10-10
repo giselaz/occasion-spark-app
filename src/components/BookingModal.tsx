@@ -29,10 +29,7 @@ export const BookingModal = ({ event, children }: BookingModalProps) => {
     try {
       const checkoutUrl = await createCheckoutSession({
         eventId: event._id,
-        eventName: event.name,
-        ticketCount,
-        pricePerTicket: event.fee,
-        attendeeName,
+        quantity:ticketCount,
         attendeeEmail,
       });
 

@@ -14,6 +14,8 @@ import NotFound from "./pages/NotFound";
 import UserProfile from "./pages/UserProfile";
 import Navigation from "./components/Navigation";
 import ProtectedRoute from "./components/ProtectedRoute";
+import BookingSuccess from "./pages/BookingSuccess";
+import BookingCancel from "./pages/BookingCancel";
 
 const queryClient = new QueryClient();
 export const protectedRoutes = [
@@ -34,13 +36,14 @@ const App = () => (
                 <Route key={path} path={path} element={element} />
               ))}
             </Route>
-
             <Route path="/" element={<Index />} />
             <Route path="/events" element={<AllEvents />} />
             <Route path="/event/:id" element={<EventDetails />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/booking/success" element={<BookingSuccess/>} />
+            <Route path="/booking/cancel" element={<BookingCancel/>} />
+             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
